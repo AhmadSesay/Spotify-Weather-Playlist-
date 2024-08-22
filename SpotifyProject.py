@@ -185,3 +185,35 @@ for track in songRecs['tracks']:
     print(f"{track['name']} by {track['artists'][0]['name']} (Spotify URI: {track['uri']})")
     uri_list.append(track['uri'])
 
+
+
+
+playlists = sp.current_user_playlists()
+playlistID = None
+user = sp.current_user()['uri'][13:]
+
+
+sp = spotipy.Spotify(
+    auth_manager= SpotifyOAuth(
+        client_id = CLIENT_ID,
+        client_secret = CLIENT_SECRET,
+        redirect_uri = REDIRECT_URI,
+        scope = "playlist-modify-public"
+    )
+)
+for playlist in playlists['items']:
+    if playlist['name'] == "Weather Playlist":
+      playlistID = playlist['id']
+
+if playlistID == None:
+    
+    playlist = sp.user_playlist_create("sesay.ahmad", "Weather Playlist", public = True, collaborative= False, description= "")
+    playlistID = playlist['id']
+
+
+sp.user_playlist_replace_tracks(user, playlistID, uri_list)
+
+
+
+
+   
