@@ -84,20 +84,19 @@ streamingHistory = streamingHistory.rename(columns= {'endTime': 'datetime'})
 testData = pd.merge(streamingHistory, weatherData[['datetime','conditions','temp']], on='datetime', how = 'left')
 testData = testData.dropna()
 
-testData['time'] = testData['datetime'].str[10:]
+testData['time'] = testData['datetime'].str[11:]
+
 
 
 # Method that filters the merged datasets by the provided temperature,range,conditions, and time.
 
 def get_matching_songs(song_history, current_temp, range, condition, time):
 
-    currentWeather = 78
-    range = 5
-    condition = "Partially cloudy"
-    time = "17:00:00" #use datetime to get current time
+    
+     #use datetime to get current time
 
     # Filters songs that were listend in higher temperatures
-    matchingSongsTemp = song_history[song_history['temp'] < currentWeather + range]
+    matchingSongsTemp = song_history[song_history['temp'] < current_temp + range]
 
     # If any rows do not match the upper bound for temerpature, None is returned.
 
@@ -105,7 +104,7 @@ def get_matching_songs(song_history, current_temp, range, condition, time):
        return None
     
     # Filters out songs that were listend to in lower temperatures
-    matchingSongsTemp = matchingSongsTemp[matchingSongsTemp['temp'] > currentWeather - range]
+    matchingSongsTemp = matchingSongsTemp[matchingSongsTemp['temp'] > current_temp - range]
 
     # Filters out songs that were listened to in differnt weather conditions
     matchingSongsConditions = matchingSongsTemp[matchingSongsTemp['conditions'] == condition]
@@ -122,7 +121,7 @@ def get_matching_songs(song_history, current_temp, range, condition, time):
       return matchingSongsConditions
 
 #gets dataset of songs that were listend to in simillar conditions.
-matchingSongs = get_matching_songs(testData,70,5,"Partially cloudy","17:00:00" )
+matchingSongs = get_matching_songs(testData,50,5,"Overcast","21:00:00" )
 
 # Filters out any songs that were listend to for less than 60 seconds
 matchingSongs = matchingSongs[matchingSongs['msPlayed'] > 60000]
@@ -175,13 +174,15 @@ matchingSongs['songID'] = matchingSongs['songID'].apply(get_song_id)
 
 matchingSongs['artistID'] = matchingSongs['artistName'].apply(get_artist_id)
 
+matchingSongs = matchingSongs[matchingSongs['songID'] != ""]
+
 #matchingSongs['genreID'] = matchingSongs['artistID'].apply(get_genre_id)
 
 # Gets the first 5 song an artist ID's
 inputs = matchingSongs[['songID', 'artistID']].head(5)
 
 # provides a  20 song reccomendation based on the top 5 songs for in the matchingSongs dataset.
-songRecs = sp.recommendations(seed_tracks=inputs['songID'].tolist(), limit=20)
+songRecs = sp.recommendations(seed_tracks=inputs['songID'].tolist(), limit=50)
 uri_list = []
 for track in songRecs['tracks']:
     print(f"{track['name']} by {track['artists'][0]['name']} (Spotify URI: {track['uri']})")
