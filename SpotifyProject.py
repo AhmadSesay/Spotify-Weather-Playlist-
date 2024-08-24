@@ -91,7 +91,7 @@ testData['time'] = testData['datetime'].str[10:]
 
 def get_matching_songs(song_history, current_temp, range, condition, time):
 
-    currentWeather = 70
+    currentWeather = 78
     range = 5
     condition = "Partially cloudy"
     time = "17:00:00" #use datetime to get current time
@@ -149,8 +149,10 @@ def get_song_id(query):
   result = sp.search(q=query, type="track", limit=1)
 
   # Step 5: Extract the Spotify ID from the result
-  if result['tracks']['items']:
+  if len(result['tracks']['items']) > 0:
     track_id = result['tracks']['items'][0]['id']
+  else:
+     track_id = ""
   return str(track_id)
 
 #gets the genre ID
